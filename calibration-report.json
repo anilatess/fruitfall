@@ -1,0 +1,43 @@
+{
+  "generatedAt": "2026-10-16T14:53:45.237Z",
+  "target": 0.96,
+  "samplesPerMode": 10000,
+  "modes": [
+    {
+      "count": 10,
+      "coefficient": 0.09278410299035045,
+      "holdoutRtp": 0.9505292999999978,
+      "approximate95Interval": [
+        0.9426947575822657,
+        0.9583638424177299
+      ],
+      "profitRate": 0.3949,
+      "capRate": 0,
+      "meanScore": 10.2449
+    },
+    {
+      "count": 15,
+      "coefficient": 0.04474252077497673,
+      "holdoutRtp": 0.9580964000000624,
+      "approximate95Interval": [
+        0.9517025478564877,
+        0.964490252143637
+      ],
+      "profitRate": 0.4546,
+      "capRate": 0,
+      "meanScore": 21.4136
+    },
+    {
+      "count": 20,
+      "coefficient": 0.027721788748419476,
+      "holdoutRtp": 0.9588188999999904,
+      "approximate95Interval": [
+        0.952613182240205,
+        0.9650246177597758
+      ],
+      "profitRate": 0.2538,
+      "capRate": 0,
+      "meanScore": 34.5865
+    }
+  ]
+}
