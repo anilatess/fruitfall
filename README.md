@@ -1,6 +1,10 @@
 # Fruitfall
 
+[Canlı oyunu aç](https://anilatess.github.io/fruitfall/)
+
 JavaScript, PixiJS 8 ve Matter.js ile yapılmış, gerçekçi meyve dokuları kullanan otomatik meyve birleştirme oyunu. Arayüz Türkçedir. Sunucu, üyelik veya gerçek para bağlantısı gerektirmez.
+
+Arayüz tek bir oyun alanı ve altındaki kontrol satırından oluşur. 10 / 15 / 20 seçimi, meyve başına jeton ve toplam tur ücreti aynı yerde bulunur. Geçmiş, istatistikler ve ayrıntılı kurallar üstteki iki düğmeden açılır. Mobilde ayrı veya yinelenen bir kontrol paneli kullanılmaz.
 
 ## Çalıştırma
 
@@ -96,7 +100,7 @@ npm run format:check
 - Ses başlangıçta kapalıdır; oyuncunun etkileşimiyle açılır.
 - Duraklatma düğmesi veya oyun dışındaki bir öğe odakta değilken boşluk tuşu kullanılır.
 - Hareket azaltma tercihi varsa parçacık ve ödül animasyonları azaltılır.
-- Küçük ekranlarda oyun, mod seçimi ve hasat panelleri alt alta yerleşir.
+- Küçük ekranlarda da tek oyun alanı ve aynı kontrol satırı kullanılır.
 
 ## GitHub Pages'te yayınlama
 
@@ -111,4 +115,4 @@ Yayın akışının referansı: [GitHub Pages resmî workflow belgeleri](https:/
 
 ## Görseller
 
-Gerçekçi altı meyve tek bir saydam sprite atlasındadır: `public/assets/fruits.png`. Üretim kaydı ve kullanılan prompt [ASSETS.md](ASSETS.md) dosyasındadır. Arayüzdeki çizgisel simgeler projede çizilmiştir. DM Sans çevrimiçi yüklenir; yüklenemezse sistem yazı tipi kullanılır.
+Gerçekçi altı meyve tek bir saydam sprite atlasındadır: `public/assets/fruits.png`. Üretim kaydı ve kullanılan prompt [ASSETS.md](ASSETS.md) dosyasındadır. Arayüzdeki çizgisel simgeler projede çizilmiştir. Sistem yazı tipi kullanılır; harici yazı tipi isteği yapılmaz. Görüntüdeki kamera kırpması fizik koordinatlarını veya tur sonuçlarını değiştirmez.

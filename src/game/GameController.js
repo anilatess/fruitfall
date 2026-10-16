@@ -61,14 +61,6 @@ export class GameController {
     this.view.on('stake-down', 'click', () => this.changeStake(-1));
     this.view.on('stake-up', 'click', () => this.changeStake(1));
     this.view.on('start-button', 'click', () => this.start());
-    this.view.on('mobile-start-button', 'click', () => {
-      this.start();
-      this.scrollToPanel('.game-stage');
-    });
-    this.view.on('mobile-mode-button', 'click', () => {
-      this.scrollToPanel(this.busy ? '.game-stage' : '.setup-panel');
-    });
-    this.view.on('result-again', 'click', () => this.start());
     this.view.on('pause-button', 'click', () => this.setPaused(!this.paused));
     this.view.on('resume-button', 'click', () => this.setPaused(false));
     this.view.on('sound-button', 'click', async () =>
@@ -116,11 +108,6 @@ export class GameController {
     if (this.simulation.state === 'finished') this.showIdleSelection();
   }
 
-  scrollToPanel(selector) {
-    const behavior = matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth';
-    this.view.root.querySelector(selector).scrollIntoView({ behavior, block: 'start' });
-  }
-
   refreshSelection() {
     this.view.setSelection(this.selectedCount, STAKES[this.stakeIndex], this.busy);
   }
@@ -132,8 +119,8 @@ export class GameController {
     this.view.elements['round-result'].hidden = true;
     this.view.elements['idle-hint'].hidden = false;
     this.view.updateRound({ dropped: 0, totalDrops: this.selectedCount, merges: 0 }, 0, 1);
-    this.view.setStatus('Yeni bir tur için hazır');
-    this.view.elements['next-label'].textContent = 'BAHÇEDEN SEPETE';
+    this.view.setStatus('Hazır');
+    this.view.elements['next-label'].textContent = 'Sıradaki';
     this.view.elements['next-fruits'].replaceChildren();
   }
 
@@ -159,7 +146,7 @@ export class GameController {
     this.view.updateWallet(this.wallet);
     this.view.updateRound(this.simulation.snapshot(), 0, cost);
     this.view.showNext(this.simulation.sequence, 0);
-    this.view.setStatus('Meyveler bahçeden geliyor');
+    this.view.setStatus('Oynanıyor');
     this.audio.unlock();
   }
 
@@ -167,7 +154,7 @@ export class GameController {
     if (event.type === 'drop') {
       this.view.showNext(this.simulation.sequence, event.dropped);
       this.view.updateRound(event, this.payout, this.currentCost);
-      if (event.dropped === event.totalDrops) this.view.setStatus('Son birleşmeler tamamlanıyor');
+      if (event.dropped === event.totalDrops) this.view.setStatus('Son birleşmeler');
     }
     if (event.type === 'merge') {
       const nextPayout = payoutForMode(event.score, this.currentCost, this.selectedCount);
@@ -179,7 +166,7 @@ export class GameController {
       this.renderer.burst(event, difference ? `+${formatTokens(difference)}` : '5×');
       this.audio.playMerge(event.level);
     }
-    if (event.type === 'overflow') this.view.setStatus('Sepet doldu, son birleşmeler bekleniyor');
+    if (event.type === 'overflow') this.view.setStatus('Sepet doldu');
     if (event.type === 'finish') this.finish(event);
   }
 

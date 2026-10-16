@@ -10,6 +10,9 @@ import {
 } from 'pixi.js';
 import { FRUITS, GAME } from '../config/game.js';
 
+// Crop presentation margins without changing physics coordinates or outcomes.
+const VIEW = Object.freeze({ width: 460, height: 530, offsetX: -50, offsetY: -90 });
+
 // Artwork pivots sit at the flesh of each fruit, excluding stems and leaves.
 const ART = [
   { x: 0.5, y: 0.625, diameter: 0.66 },
@@ -44,8 +47,8 @@ export class FruitRenderer {
 
   async init() {
     await this.app.init({
-      width: GAME.width,
-      height: GAME.height,
+      width: VIEW.width,
+      height: VIEW.height,
       backgroundAlpha: 0,
       antialias: true,
       preference: 'webgl',
@@ -74,107 +77,56 @@ export class FruitRenderer {
         }),
     );
     this.shadowTexture = makeShadowTexture();
+    this.scene = new Container();
+    this.scene.position.set(VIEW.offsetX, VIEW.offsetY);
+    this.app.stage.addChild(this.scene);
     this.drawBasket();
     this.shadowLayer = new Container();
     this.fruitLayer = new Container();
     this.effectLayer = new Container();
-    this.app.stage.addChild(this.shadowLayer, this.fruitLayer, this.effectLayer);
+    this.scene.addChild(this.shadowLayer, this.fruitLayer, this.effectLayer);
     this.drawGlassReflections();
   }
 
   drawBasket() {
-    const glowCanvas = document.createElement('canvas');
-    glowCanvas.width = GAME.width;
-    glowCanvas.height = GAME.height;
-    const context = glowCanvas.getContext('2d');
-    const glow = context.createRadialGradient(270, 440, 20, 270, 420, 330);
-    glow.addColorStop(0, '#64734427');
-    glow.addColorStop(0.65, '#3d573218');
-    glow.addColorStop(1, '#2f472500');
-    context.fillStyle = glow;
-    context.fillRect(0, 0, GAME.width, GAME.height);
-    this.app.stage.addChild(new Sprite(Texture.from(glowCanvas)));
-
     const glass = new Graphics();
     glass
       .moveTo(GAME.left, GAME.rim)
-      .lineTo(GAME.left, GAME.floor - 34)
-      .quadraticCurveTo(GAME.left, GAME.floor, GAME.left + 34, GAME.floor)
-      .lineTo(GAME.right - 34, GAME.floor)
-      .quadraticCurveTo(GAME.right, GAME.floor, GAME.right, GAME.floor - 34)
+      .lineTo(GAME.left, GAME.floor - 30)
+      .quadraticCurveTo(GAME.left, GAME.floor, GAME.left + 30, GAME.floor)
+      .lineTo(GAME.right - 30, GAME.floor)
+      .quadraticCurveTo(GAME.right, GAME.floor, GAME.right, GAME.floor - 30)
       .lineTo(GAME.right, GAME.rim)
-      .stroke({ color: 0xa6bea5, alpha: 0.23, width: 2.4 });
+      .stroke({ color: 0x5b6062, alpha: 0.7, width: 2 });
     glass
-      .roundRect(GAME.left + 3, GAME.rim, GAME.right - GAME.left - 6, GAME.floor - GAME.rim - 2, 28)
-      .fill({ color: 0xd4e7c4, alpha: 0.018 });
+      .roundRect(GAME.left + 3, GAME.rim, GAME.right - GAME.left - 6, GAME.floor - GAME.rim - 2, 25)
+      .fill({ color: 0xffffff, alpha: 0.13 });
     glass
-      .roundRect(GAME.left - 9, GAME.rim - 5, GAME.right - GAME.left + 18, 9, 4)
-      .fill({ color: 0xaec1a1, alpha: 0.1 })
-      .stroke({ color: 0xb7c6ac, alpha: 0.14, width: 1 });
-    glass
-      .moveTo(GAME.left + 6, GAME.rim + 15)
-      .lineTo(GAME.left + 6, GAME.floor - 38)
-      .stroke({ color: 0xcce3c6, alpha: 0.05, width: 7 });
-    glass
-      .moveTo(GAME.right - 5, GAME.rim + 16)
-      .lineTo(GAME.right - 5, GAME.floor - 39)
-      .stroke({ color: 0xcce3c6, alpha: 0.07, width: 4 });
-    this.app.stage.addChild(glass);
+      .roundRect(GAME.left - 5, GAME.rim - 3, GAME.right - GAME.left + 10, 5, 2)
+      .fill({ color: 0x626668, alpha: 0.8 });
+    this.scene.addChild(glass);
 
     this.dangerLine = new Graphics();
-    for (let x = GAME.left + 16; x < GAME.right - 12; x += 12) {
+    for (let x = GAME.left + 12; x < GAME.right - 10; x += 11) {
       this.dangerLine.moveTo(x, GAME.danger).lineTo(x + 4, GAME.danger);
     }
-    this.dangerLine.stroke({ color: 0xb2a975, alpha: 0.24, width: 1 });
-    this.app.stage.addChild(this.dangerLine);
-    const limit = new Text({
-      text: 'SEPET SINIRI',
-      style: { fontFamily: 'Arial', fontSize: 7, letterSpacing: 1.2, fill: 0x7c8d71 },
-    });
-    limit.anchor.set(1, 0.5);
-    limit.position.set(GAME.right - 15, GAME.danger - 13);
-    this.app.stage.addChild(limit);
+    this.dangerLine.stroke({ color: 0x73736a, alpha: 0.27, width: 1 });
+    this.scene.addChild(this.dangerLine);
 
     const base = new Graphics();
     base
-      .roundRect(GAME.left - 15, GAME.floor + 9, GAME.right - GAME.left + 30, 17, 6)
-      .fill({ color: 0x756043, alpha: 0.42 });
-    base
-      .roundRect(GAME.left - 18, GAME.floor + 7, GAME.right - GAME.left + 36, 6, 3)
-      .fill({ color: 0xa68e62, alpha: 0.55 });
-    base
-      .moveTo(GAME.left - 8, GAME.floor + 8)
-      .lineTo(GAME.right + 8, GAME.floor + 8)
-      .stroke({ color: 0xd5ba7f, alpha: 0.34, width: 1 });
-    base
-      .roundRect(GAME.left - 8, GAME.floor + 27, GAME.right - GAME.left + 16, 3, 1)
-      .fill({ color: 0x000000, alpha: 0.2 });
-    this.app.stage.addChild(base);
-    const label = new Text({
-      text: 'KÜÇÜK BAŞLANGIÇLAR, BÜYÜK BİRLEŞMELER',
-      style: {
-        fontFamily: 'Arial',
-        fontSize: 7,
-        letterSpacing: 1.6,
-        fill: 0x60745a,
-      },
-    });
-    label.anchor.set(0.5);
-    label.position.set(280, GAME.floor + 48);
-    this.app.stage.addChild(label);
+      .roundRect(GAME.left - 7, GAME.floor + 7, GAME.right - GAME.left + 14, 9, 3)
+      .fill({ color: 0x434749, alpha: 0.85 });
+    this.scene.addChild(base);
   }
 
   drawGlassReflections() {
-    const reflections = new Graphics();
-    reflections
-      .moveTo(GAME.left + 12, GAME.rim + 58)
-      .lineTo(GAME.left + 12, GAME.rim + 148)
-      .stroke({ color: 0xe4f6d5, alpha: 0.045, width: 7 });
-    reflections
-      .moveTo(GAME.left + 12, GAME.rim + 165)
-      .lineTo(GAME.left + 12, GAME.rim + 190)
-      .stroke({ color: 0xe4f6d5, alpha: 0.045, width: 7 });
-    this.app.stage.addChild(reflections);
+    const reflection = new Graphics();
+    reflection
+      .moveTo(GAME.left + 5, GAME.rim + 20)
+      .lineTo(GAME.left + 5, GAME.floor - 40)
+      .stroke({ color: 0xffffff, alpha: 0.6, width: 2 });
+    this.scene.addChild(reflection);
   }
 
   addView(fruit, animated) {
@@ -254,8 +206,8 @@ export class FruitRenderer {
           fontFamily: 'Arial',
           fontSize: cleared ? 19 : 15,
           fontWeight: '600',
-          fill: 0xe8f3ce,
-          stroke: { color: 0x233b23, width: 3 },
+          fill: 0x25272a,
+          stroke: { color: 0xf7f5ec, width: 3 },
         },
       });
       label.anchor.set(0.5);

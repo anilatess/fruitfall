@@ -62,9 +62,7 @@ export class GameView {
   ready() {
     this.elements['loading-state'].hidden = true;
     this.elements['start-button'].disabled = false;
-    this.elements['start-label'].textContent = 'Hasadı başlat';
-    this.elements['mobile-start-button'].disabled = false;
-    this.elements['mobile-start-label'].textContent = 'Hasadı başlat';
+    this.elements['start-label'].textContent = 'Oyna';
   }
 
   setSelection(count, unit, busy) {
@@ -78,8 +76,6 @@ export class GameView {
     this.elements.cost.textContent = formatTokens(cost);
     this.elements.cap.textContent = formatTokens(cost * GAME.payoutCap);
     this.elements['drop-total'].textContent = count;
-    this.elements['mobile-mode'].textContent = `${count} meyve`;
-    this.elements['mobile-cost'].textContent = formatTokens(cost);
     this.elements['stake-down'].disabled = busy || unit === 1;
     this.elements['stake-up'].disabled = busy || unit === 10;
     const mode = getMode(count);
@@ -100,15 +96,8 @@ export class GameView {
 
   setBusy(busy) {
     this.elements['start-button'].disabled = busy;
-    this.elements['start-label'].textContent = busy ? 'Hasat devam ediyor…' : 'Hasadı başlat';
+    this.elements['start-label'].textContent = busy ? 'Oynanıyor' : 'Oyna';
     this.elements['pause-button'].disabled = !busy;
-    this.elements['mobile-start-button'].disabled = busy;
-    this.elements['mobile-start-label'].textContent = busy ? 'Hasat sürüyor…' : 'Hasadı başlat';
-    this.elements['mobile-mode-hint'].textContent = busy ? 'Sepete dön ↑' : 'Modu değiştir ↑';
-    this.elements['mobile-mode-button'].setAttribute(
-      'aria-label',
-      busy ? 'Sepete git' : 'Mod seçimine git',
-    );
     if (busy) {
       this.elements['idle-hint'].hidden = true;
       this.elements['round-result'].hidden = true;
@@ -117,32 +106,26 @@ export class GameView {
 
   updateRound({ dropped, totalDrops, merges }, payout, cost) {
     const formatted = formatTokens(payout);
-    this.elements['mobile-payout'].textContent = formatted;
     const [whole, decimal] = formatted.split(',');
     this.elements.payout.innerHTML = `${whole}<span>,${decimal}</span>`;
     this.elements['drop-count'].textContent = dropped;
     this.elements['drop-total'].textContent = totalDrops;
     this.elements['merge-count'].textContent = merges;
     this.elements.multiplier.textContent = `${(payout / cost || 0).toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}×`;
-    this.elements['round-progress-fill'].style.width = `${(dropped / totalDrops) * 100 || 0}%`;
-    this.elements['reward-meter-fill'].style.width =
-      `${(payout / (cost * GAME.payoutCap)) * 100 || 0}%`;
   }
 
   showNext(sequence, dropped, finished = false) {
-    const next = sequence.slice(dropped, dropped + 3);
+    const next = sequence.slice(dropped, dropped + 1);
     this.elements['next-label'].textContent = next.length
-      ? 'SIRADAKİ MEYVELER'
+      ? 'Sıradaki'
       : finished
-        ? 'HASAT TAMAMLANDI'
-        : 'SON BİRLEŞMELER';
+        ? ''
+        : 'Son meyve';
     this.elements['next-fruits'].innerHTML = next.map(({ level }) => fruitIcon(level)).join('');
   }
 
-  setStatus(text, dot = true) {
-    this.elements['round-status'].replaceChildren();
-    if (dot) this.elements['round-status'].append(document.createElement('i'));
-    this.elements['round-status'].append(document.createTextNode(text));
+  setStatus(text) {
+    this.elements['round-status'].textContent = text;
   }
 
   flashPayout() {
@@ -167,17 +150,15 @@ export class GameView {
 
   showResult(result) {
     this.elements['result-title'].textContent =
-      result.reason === 'full' ? 'SEPET DOLDU · HASADIN KORUNDU' : 'HASAT TAMAMLANDI';
+      result.reason === 'full' ? 'Sepet doldu' : 'Tur bitti';
     this.elements['result-payout'].textContent = formatTokens(result.payout);
     const net = result.payout - result.cost;
     this.elements['result-net'].textContent =
-      `Net sonuç: ${net > 0 ? '+' : ''}${formatTokens(net)} jeton`;
+      `Net: ${net > 0 ? '+' : ''}${formatTokens(net)} jeton`;
     this.elements['result-net'].classList.toggle('positive', net > 0);
     this.elements['round-result'].hidden = false;
     this.setStatus(
-      result.reason === 'full'
-        ? 'Sepet doldu, ödül bakiyene eklendi'
-        : 'Hasat tamamlandı, ödül bakiyene eklendi',
+      result.reason === 'full' ? 'Sepet doldu · ödül eklendi' : 'Tur tamamlandı · ödül eklendi',
     );
   }
 
@@ -194,7 +175,7 @@ export class GameView {
             minute: '2-digit',
             timeZone: 'Europe/Istanbul',
           });
-          return `<div class="history-row"><span class="history-symbol">${icon('leaf')}</span><div class="history-copy"><strong>${round.count} meyvelik hasat</strong><span>${time} · ${round.reason === 'interrupted' ? 'Yarım kalan tur' : `${round.merges} birleşme`}</span></div><div class="history-amount">${formatTokens(round.payout)}<small>${(round.payout / round.cost).toFixed(2).replace('.', ',')}×</small></div></div>`;
+          return `<div class="history-row"><div class="history-copy"><strong>${round.count} meyve</strong><span>${time} · ${round.reason === 'interrupted' ? 'Yarım kalan tur' : `${round.merges} birleşme`}</span></div><div class="history-amount">${formatTokens(round.payout)}<small>${(round.payout / round.cost).toFixed(2).replace('.', ',')}×</small></div></div>`;
         })
         .join('');
     }
@@ -235,7 +216,7 @@ export class GameView {
     const loading = this.elements['loading-state'];
     loading.replaceChildren();
     const message = document.createElement('span');
-    message.textContent = 'Bahçe yüklenemedi. Sayfayı yeniden açmayı dene.';
+    message.textContent = 'Oyun yüklenemedi. Sayfayı yeniden açmayı dene.';
     const retry = document.createElement('button');
     retry.className = 'error-retry';
     retry.textContent = 'Yeniden dene';
